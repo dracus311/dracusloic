@@ -1,0 +1,73 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FacturoAfrik</title><script src="https://cdn.tailwindcss.com"></script>
+<link rel="manifest" id="manifest"><meta name="theme-color" content="#10b981"></head><body class="bg-gray-50 p-4"><div class="max-w-md mx-auto">
+<h1 class="text-3xl font-black text-center">FacturoAfrik</h1><p class="text-center text-xs font-bold">690186311 Orange / Wave</p>
+<div id="status" class="mt-3 text-center py-3 rounded-xl bg-red-100 text-red-700 font-black">🔒 Verrouillé - Paie pour débloquer</div>
+
+<div class="bg-white p-4 rounded-2xl shadow mt-4">
+<h2 class="font-black">1. LOGO + ORNEMENT</h2>
+<input type="file" id="logoInput" class="w-full border-2 p-3 rounded-xl mt-2"><div id="logoPreview" class="mt-2 h-16 border-2 border-dashed rounded-xl flex items-center justify-center text-xs">Aperçu logo</div>
+<select id="ornementSelect" class="w-full border-2 p-3 rounded-xl mt-2 font-bold bg-yellow-50">
+<option>✦ FACTURE ✦</option><option>⚙ FACTURE PLOMBERIE ⚙</option><option>⬣ FACTURE BTP ⬣</option><option>✿ FACTURE BEAUTÉ ✿</option><option>🔧 FACTURE GARAGE 🔧</option><option>🍽 RESTAURATION 🍽</option><option>💻 INFORMATIQUE 💻</option><option>👗 BOUTIQUE 👗</option><option>⚡ ÉLECTRICITÉ ⚡</option><option>🚚 TRANSPORT 🚚</option><option>🏥 PHARMACIE 🏥</option><option>🎓 ÉCOLE 🎓</option>
+</select>
+<div id="ornementPreview" class="mt-3 text-center py-3 bg-gray-100 rounded-xl font-black border-2">✦ FACTURE ✦</div>
+</div>
+
+<div id="factureContent" style="filter:blur(15px);pointer-events:none;opacity:0.5" class="bg-white p-4 rounded-2xl shadow mt-4">
+<h2 class="font-black">2. TA FACTURE</h2><p class="text-sm">Sera débloquée après paiement</p><button class="w-full mt-3 bg-emerald-600 text-white py-3 rounded-xl font-black">📄 TÉLÉCHARGER PDF</button>
+</div>
+
+<div class="bg-white p-4 rounded-2xl shadow mt-4 border-2 border-emerald-600">
+<h2 class="font-black">3. CHOISIS TON PLAN</h2>
+<div class="flex gap-2 mt-3">
+<div onclick="setPlan(2500,'FREELANCE')" id="plan2500" class="flex-1 cursor-pointer border-2 p-3 rounded-xl text-center bg-emerald-50 border-emerald-600"><p class="font-black text-sm">FREELANCE</p><p class="text-2xl font-black">2500F</p><p class="text-[10px]">1 logo + couleur</p></div>
+<div onclick="setPlan(5000,'ENTREPRISE')" id="plan5000" class="flex-1 cursor-pointer border-2 p-3 rounded-xl text-center bg-white border-gray-300"><p class="font-black text-sm">ENTREPRISE</p><p class="text-2xl font-black">5000F</p><p class="text-[10px]">Illimité + VIP</p></div>
+</div>
+<p class="text-sm mt-3 font-black">Choisi: <span id="planLabel" class="text-emerald-700">FREELANCE 2500F</span></p>
+<div class="grid grid-cols-2 gap-2 mt-3">
+<button onclick="setM('Orange Money')" id="btnOrange" class="py-3 rounded-xl border-2 border-orange-500 bg-orange-50 font-black text-xs">ORANGE<br>690186311</button>
+<button onclick="setM('Wave')" id="btnWave" class="py-3 rounded-xl border-2 border-blue-500 bg-blue-50 font-black text-xs">WAVE<br>690186311</button>
+</div>
+<div id="payBox" class="hidden mt-3 bg-gray-100 p-3 rounded-xl">
+<p class="text-sm font-bold">Mode: <span id="mLabel"></span> | <span id="mPlan"></span></p>
+<input id="txId" placeholder="ID transaction Orange/Wave" class="w-full border-2 p-3 rounded-xl mt-2 text-sm">
+<input id="telPayeur" placeholder="Ton numéro 6xx" class="w-full border-2 p-3 rounded-xl mt-2 text-sm">
+<button onclick="payNow()" class="w-full mt-3 bg-black text-white py-4 rounded-xl font-black text-lg">J'AI PAYÉ - DÉBLOQUER</button>
+</div>
+<div id="waitMsg" class="hidden mt-3 bg-green-100 p-3 rounded-xl text-sm font-bold text-green-800"></div>
+</div>
+
+<script>
+let mode='Orange Money'; let planPrice=2500; let planName='FREELANCE';
+const manifest = {name:"FacturoAfrik", short_name:"FacturoAfrik", start_url:"/", display:"standalone", background_color:"#ffffff", theme_color:"#10b981", icons:[{src:"https://cdn-icons-png.flaticon.com/512/891/891462.png", sizes:"512x512", type:"image/png"}]};
+document.getElementById('manifest').href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], {type:'application/json'}));
+
+document.getElementById('ornementSelect').addEventListener('change', e=>{ document.getElementById('ornementPreview').innerText=e.target.value; });
+document.getElementById('logoInput').addEventListener('change', e=>{ let r=new FileReader(); r.onload=ev=>{ document.getElementById('logoPreview').innerHTML=`<img src="${ev.target.result}" class="h-14 object-contain">` }; r.readAsDataURL(e.target.files[0]); });
+
+if(localStorage.getItem('paid')==='1'){ debloquer(); }
+
+function setPlan(p,n){ planPrice=p; planName=n; document.getElementById('planLabel').innerText=n+' '+p+'F'; document.getElementById('mPlan').innerText=n+' '+p+'F'; document.getElementById('plan2500').className=p==2500?'flex-1 cursor-pointer border-2 p-3 rounded-xl text-center bg-emerald-50 border-emerald-600':'flex-1 cursor-pointer border-2 p-3 rounded-xl text-center bg-white border-gray-300'; document.getElementById('plan5000').className=p==5000?'flex-1 cursor-pointer border-2 p-3 rounded-xl text-center bg-emerald-50 border-emerald-600':'flex-1 cursor-pointer border-2 p-3 rounded-xl text-center bg-white border-gray-300'; }
+function setM(m){ mode=m; document.getElementById('payBox').classList.remove('hidden'); document.getElementById('mLabel').innerText=m; document.getElementById('mPlan').innerText=planName+' '+planPrice+'F'; document.getElementById('payBox').scrollIntoView({behavior:'smooth'}); }
+
+function payNow(){
+  let tx=document.getElementById('txId').value.trim();
+  let tel=document.getElementById('telPayeur').value.trim();
+  if(!tx){ alert('Mets ID transaction'); return; }
+  if(!tel){ alert('Mets ton numéro'); return; }
+  localStorage.setItem('paid','1');
+  debloquer();
+  document.getElementById('waitMsg').classList.remove('hidden');
+  document.getElementById('waitMsg').innerHTML='✅ Paiement reçu!<br>Plan: '+planName+' '+planPrice+'F<br>Envoie la preuve sur WhatsApp';
+  let msg=`NOUVEAU PAIEMENT%0APlan: ${planName} ${planPrice}F%0AMode: ${mode}%0ATel: ${tel}%0AID: ${tx}`;
+  setTimeout(()=>{ window.open(`https://wa.me/237690186311?text=${msg}`, '_blank'); }, 800);
+}
+
+function debloquer(){
+  document.getElementById('factureContent').style.filter='none';
+  document.getElementById('factureContent').style.pointerEvents='auto';
+  document.getElementById('factureContent').style.opacity='1';
+  document.getElementById('status').innerText='✅ Débloqué - '+planName;
+  document.getElementById('status').className='mt-3 text-center py-3 rounded-xl bg-green-100 text-green-700 font-black';
+}
+</script>
+</div></body></html>
