@@ -1,9 +1,15 @@
-{
-  "name": "Dracus Loic IPTV",
-  "short_name": "Dracus IPTV",
+b{
+  "name": "FactureOAfrik",
+  "short_name": "FactureOAfrik",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#050508",
-  "theme_color": "#3b82f6",
-  "icons": [{"src": "https://i.postimg.cc/XYZ/icon-512.png","sizes":"512x512","type":"image/png"}]
+  "background_color": "#ffffff",
+  "theme_color": "#0f4c81",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
