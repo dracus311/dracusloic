@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - FacturoAfrik</title>
+</head>
+<body style="font-family:sans-serif;padding:20px;max-width:400px;margin:auto;background:#f9f9f9">
+
+<h2 style="text-align:center">🎫 Fabriquer code</h2>
+
+<input id="tel" placeholder="Numéro client: 694697496" style="width:100%;padding:15px;margin:10px 0;border-radius:10px;border:1px solid #ccc;box-sizing:border-box">
+
+<button onclick="fabriquer()" style="width:100%;padding:15px;background:#00a651;color:white;border:none;border-radius:10px;font-weight:bold;font-size:16px">FABRIQUER LE CODE</button>
+
+<div id="box" style="margin-top:20px;padding:20px;background:white;border-radius:15px;display:none;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.1)">
+<p>CODE à envoyer au client :</p>
+<h1 id="code" style="color:#00a651;letter-spacing:2px"></h1>
+<p id="telAffiche"></p>
+<button onclick="copier()" style="width:100%;padding:12px;background:black;color:white;border:none;border-radius:10px;margin-top:10px">📋 COPIER POUR WHATSAPP</button>
+</div>
+
+<script>
+function fabriquer(){
+ let t=document.getElementById('tel').value.trim();
+ if(t.length < 9){alert("Numéro trop court");return;}
+ let c="FACT-"+t.slice(-4)+"-"+Math.random().toString(36).substring(2,8).toUpperCase();
+ document.getElementById('code').innerText=c;
+ document.getElementById('telAffiche').innerText="Pour: "+t;
+ document.getElementById('box').style.display='block';
+}
+function copier(){
+ let c=document.getElementById('code').innerText;
+ let t=document.getElementById('tel').value.trim();
+ let msg="✅ FacturoAfrik\n\nVotre code d'activation: "+c+"\n\nAllez sur: https://dracusloic.vercel.app/activer.html\nEntrez votre numéro "+t+" et ce code pour activer 30 jours Premium.\n\nMerci !";
+ navigator.clipboard.writeText(msg);
+ alert("Copié ! Va coller sur WhatsApp");
+}
+</script>
+
+</body>
+</html>
