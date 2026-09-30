@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin FacturoAfrik</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:sans-serif;background:#0f0f0f;color:#fff;padding:15px}
+.card{background:#1e1e1e;padding:15px;border-radius:12px;margin:12px 0;border-left:5px solid #ff9800}
+button{padding:14px;border:0;border-radius:10px;font-weight:bold;width:100%;font-size:16px;cursor:pointer}
+.btn-valide{background:#00e676;color:#000}
+#notif{position:fixed;top:0;left:0;right:0;background:#ff1744;color:#fff;padding:22px;text-align:center;display:none;z-index:9999;font-size:20px;font-weight:bold}
+</style>
+</head>
+<body>
+<div id="notif">🔔 NOUVEAU PAIEMENT - VÉRIFIE TON MOMO !</div>
+<h2>💰 Admin FacturoAfrik</h2>
+<p id="status">🟢 En écoute...</p>
+<audio id="son" preload="auto" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3"></audio>
+<div id="liste">Chargement...</div>
+
+<script>
+const sb = supabase.createClient("https://mzjogfulbtcybsjwnvhr.supabase.co","sb_publishable_v2Z5-U6LWckZoRibn9DTpw_4uKKYTXI");
+
+async function charger(){
+  const {data} = await sb.from('demandes').select('*').eq('statut','en_attente').order('created_at',{ascending:false});
+  document.getElementById('liste').innerHTML = data.length ? data.map(d=>`
+    <div class="card">
+      <div style="font-size:20px">📱 <b>${d.tel}</b></div>
+      <div>${d.plan} | ${d.mois} mois | <b>${d.total} FCFA</b></div>
+      <small>${new Date(d.created_at).toLocaleString()}</small><br><br>
+      <button class="btn-valide" onclick="debloquer(${d.id},'${d.tel}','${d.plan}',${d.mois},${d.total})">✅ J'AI REÇU ${d.total} F - DÉBLOQUER</button>
+    </div>`).join('') : "<p>Aucune demande en attente</p>";
+}
+charger();
+
+// TEMPS RÉEL = NOTIF INSTANTANÉE
+sb.channel('notif-paiement').on('postgres_changes',{event:'INSERT',schema:'public',table:'demandes'}, p=>{
+  document.getElementById('notif').style.display='block';
+  document.getElementById('son').play().catch(()=>{});
+  if(navigator.vibrate) navigator.vibrate([600,200,600,200,600]);
+  if(Notification.permission=="granted") new Notification("💰 Paiement Facturo!",{body: p.new.tel+" a payé "+p.new.total+" FCFA"});
+  charger();
+  setTimeout(()=>document.getElementById('notif').style.display='none', 10000);
+}).subscribe();
+
+if(Notification.permission!=="granted") Notification.requestPermission();
+
+async function debloquer(id,tel,plan,mois,total){
+  if(!confirm("Tu confirmes avoir reçu "+total+" FCFA de "+tel+" ?")) return;
+  const fin = new Date(); fin.setMonth(fin.getMonth()+mois);
+  await sb.from('paiements').insert({tel,plan,mois,total,statut:'actif',fin:fin.toISOString()});
+  await sb.from('demandes').update({statut:'valide'}).
