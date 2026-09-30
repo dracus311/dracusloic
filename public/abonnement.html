@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payer Abonnement - FacturoAfrik</title>
+</head>
+<body style="font-family:sans-serif;background:#f5f5f5;padding:15px;margin:0">
+<div style="max-width:400px;margin:auto">
+<h2 style="text-align:center">💳 Payer votre abonnement</h2>
+
+<div style="background:white;padding:15px;border-radius:15px;margin-bottom:15px">
+<label>Choisissez la formule :</label>
+<select id="formule" style="width:100%;padding:12px;margin-top:8px;border-radius:10px;border:1px solid #ccc">
+<option value="FREELANCE - 2500F">FREELANCE - 2 500 FCFA / mois</option>
+<option value="ENTREPRISE - 5000F">ENTREPRISE - 5 000 FCFA / mois</option>
+</select>
+</div>
+
+<div style="background:white;padding:15px;border-radius:15px;margin-bottom:15px">
+<label>Votre numéro WhatsApp :</label>
+<input id="tel" placeholder="Ex: 690123456" style="width:100%;padding:12px;margin-top:8px;border-radius:10px;border:1px solid #ccc;box-sizing:border-box">
+</div>
+
+<div style="background:#e8f5e9;padding:15px;border-radius:15px;margin-bottom:15px;border:1px solid #00a651">
+<h3 style="margin:0 0 10px 0">📲 Payez par Mobile Money :</h3>
+<p><b>MTN MoMo :</b> 694697496 (Loic Dracus)</p>
+<p><b>Orange Money :</b> 694697496</p>
+<p style="font-size:13px;color:#555">Mettez en motif: FacturoAfrik + votre numéro</p>
+</div>
+
+<button onclick="japaye()" style="width:100%;padding:16px;background:#00a651;color:white;border:none;border-radius:12px;font-weight:bold;font-size:16px">✅ J'AI PAYÉ, CONFIRMER</button>
+
+<p style="text-align:center;font-size:13px;margin-top:15px">Après paiement, cliquez ci-dessus pour envoyer la preuve à l'admin.</p>
+</div>
+
+<script>
+function japaye(){
+ let formule=document.getElementById('formule').value;
+ let tel=document.getElementById('tel').value.trim();
+ if(tel.length<9){alert("Mettez votre numéro");return;}
+ let msg="Bonjour FacturoAfrik,%0A%0AJe viens de payer mon abonnement.%0A%0AFormule: "+formule+"%0AMon numéro: "+tel+"%0A%0AJ'ai payé sur 694697496. Merci de m'envoyer mon code d'activation.";
+ window.open("https://wa.me/237694697496?text="+msg,"_blank");
+}
+</script>
+</body>
+</html>
