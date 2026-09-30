@@ -1,0 +1,6 @@
+{
+  "actifs": ["690186311"],
+  "abonnements": {
+    "690186311": { "plan": "entreprise", "fin": "2026-12-31", "mois": 12 }
+  }
+}
