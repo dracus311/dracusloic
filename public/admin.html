@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dracus Loic IPTV - Premium</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#050508;color:#fff;min-height:100vh;overflow-x:hidden}
+.hidden{display:none!important}
+/* CLIENT */
+#client-view header{padding:18px;text-align:center;border-bottom:1px solid #1a1a23;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);position:sticky;top:0;z-index:10}
+#client-view header h1{font-family:'Space Grotesk';font-size:22px;letter-spacing:2px}
+#client-view .hero{padding:35px 20px 10px;text-align:center}
+#client-view .hero h2{font-family:'Space Grotesk';font-size:46px;font-weight:800;line-height:0.9}
+#client-view .hero p{color:#888;margin-top:10px}
+#client-view .cards{display:grid;gap:22px;max-width:420px;margin:25px auto;padding:0 20px 40px}
+#client-view .card{border-radius:26px;padding:26px;border:1px solid #222;position:relative;overflow:hidden}
+#client-view .freelance{background:linear-gradient(135deg,#3b82f6 0%,#1e40af 100%);box-shadow:0 20px 40px rgba(59,130,246,.3)}
+#client-view .entreprise{background:linear-gradient(135deg,#fbbf24 0%,#d97706 100%);box-shadow:0 20px 40px rgba(251,191,36,.35);color:#000}
+#client-view .entreprise p{color:rgba(0,0,0,.7)!important}
+#client-view .orn{position:absolute;top:-10px;right:-10px;font-size:110px;opacity:.18;transform:rotate(-15deg);pointer-events:none}
+#client-view .badge{display:inline-block;padding:6px 14px;border-radius:99px;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:12px}
+#client-view .badge-solo{background:rgba(255,255,255,.25);color:#fff}
+#client-view .badge-pop{background:#000;color:#fbbf24}
+#client-view .price{font-size:40px;font-weight:800;margin:5px 0}
+#client-view .price small{font-size:15px;opacity:.8}
+#client-view .feat{font-size:14px;line-height:1.8;margin-top:12px}
+#client-view .act{margin-top:18px;display:flex;gap:10px}
+#client-view select{flex:1;padding:14px;border-radius:12px;border:none;background:rgba(0,0,0,.3);color:#fff;font-weight:700}
+#client-view .entreprise select{background:rgba(0,0,0,.15);color:#000}
+#client-view .btn{flex:1;padding:14px;border:none;border-radius:12px;font-weight:800;cursor:pointer;background:#fff;color:#000}
+#client-view .entreprise .btn{background:#000;color:#fbbf24}
+#client-view .modal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:99;padding:20px}
+#client-view .box{background:#111118;border-radius:22px;padding:26px;width:100%;max-width:380px;border:1px solid #222}
+#client-view .box input{width:100%;padding:14px;border-radius:12px;border:1px solid #222;background:#000;color:#fff;margin:10px 0}
+#client-view .btn-pay{width:100%;padding:15px;border:none;border-radius:12px;font-weight:800;background:#22c55e;color:#fff;margin-top:10px;cursor:pointer}
+#client-view .btn-cancel{width:100%;padding:12px;border:none;border-radius:12px;background:#222;color:#fff;margin-top:8px;cursor:pointer}
+/* ADMIN */
+#admin-view{background:#0f172a;min-height:100vh;padding:20px}
+#admin-view h1{font-family:'Space Grotesk'}
+#admin-view .acard{background:#1e293b;padding:18px;border-radius:16px;margin:14px 0;border-left:5px solid #ef4444}
+#admin-view .abtn{width:100%;padding:12px;border:none;border-radius:10px;font-weight:800;margin-top:8px;cursor:pointer}
+.abtn-wa{background:#25D366;color:#fff}.abtn-ok{background:#22c55e;color:#fff}
+</style>
+</head>
+<body>
+
+<div id="client-view">
+<header><h1>DRACUS LOIC IPTV</h1></header>
+<div class="hero"><h2>PREMIUM<br>IPTV</h2><p>Choisis ton activité</p></div>
+<div class="cards">
+<div class="card freelance">
+<div class="orn">💻</div>
+<span class="badge badge-solo">ACTIVITÉ SOLO</span>
+<h3 style="font-family:'Space Grotesk';font-size:20px">💼 FREELANCE</h3>
+<div class="price">2500 <small>FCFA / mois</small></div>
+<div class="feat">✓ 1 Écran personnel<br>✓ Idéal pour toi seul<br>✓ Activation rapide</div>
+<div class="act"><select id="m1"><option value="1">1 mois - 2500</option><option value="3">3 mois - 7500</option><option value="6">6 mois - 15000</option><option value="12">12 mois - 30000</option></select><button class="btn" onclick="openPay('Freelance',2500,'m1')">Choisir</button></div>
+</div>
+<div class="card entreprise">
+<div class="orn">👨‍👩‍👧‍👦</div>
+<span class="badge badge-pop">⭐ PLUS POPULAIRE - ENTREPRISE</span>
+<h3 style="font-family:'Space Grotesk';font-size:20px">🏢 ENTREPRISE</h3>
+<div class="price">5000 <small>FCFA / mois</small></div>
+<div class="feat">✓ 3 Écrans 4K<br>✓ Famille / Bureau / Bar<br>✓ Multi-TV + Mobile</div>
+<div class="act"><select id="m2"><option value="1">1 mois - 5000</option><option value="3">3 mois - 15000</option><option value="6">6 mois - 30000</option><option value="12">12 mois - 60000</option></select><button class="btn" onclick="openPay('Entreprise',5000,'m2')">Choisir</button></div>
+</div>
+</div>
+<div id="payModal" class="modal hidden"><div class="box"><h3 id="payTitle" style="font-family:'Space Grotesk'"></h3><p style="margin:12px 0;color:#aaa;font-size:14px">1. Paye Orange Money au <b style="color:#fff">653244734</b><br>2. Entre ton numéro WhatsApp :</p><input id="tel" placeholder="6XX XX XX XX"><p id="totalTxt" style="color:#22c55e;font-weight:800;margin-top:10px"></p><button class="btn-pay" onclick="envoyer()">J'AI DÉJÀ PAYÉ ✅</button><button class="btn-cancel" onclick="closePay()">Annuler</button></div></div>
+</div>
+
+<div id="admin-view" class="hidden"><h1>🔔 ADMIN - Dracus</h1><p style="color:#64748b">Sonnerie activée quand paiement arrive</p><div id="list" style="margin-top:20px">Chargement...</div><audio id="ding" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3"></audio></div>
+
+<script>
+const supa=supabase.createClient("https://mzjogfulbtcybsjwnvhr.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16am9nZnVsYnRjeWJzandudmhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MTg5OTksImV4cCI6MjEwNjI5NDk5OX0.wg_dNnggr7WLKnj1P1kd9jxPvWdX9vpsKsv1gh5dcJ8");
+let curPlan,curPrice,curMois,curTotal;
+const isAdmin=window.location.pathname.includes('admin');
+if(isAdmin){document.getElementById('client-view').classList.add('hidden');document.getElementById('admin-view').classList.remove('hidden');initAdmin();}
+function openPay(plan,price,selId){curPlan=plan;curPrice=price;curMois=parseInt(document.getElementById(selId).value);curTotal=curPrice*curMois;document.getElementById('payTitle').innerText=plan+' - '+curMois+' mois';document.getElementById('totalTxt').innerText='Total à payer: '+curTotal+' FCFA au 653244734';document.getElementById('payModal').classList.remove('hidden');}
+function closePay(){document.getElementById('payModal').classList.add('hidden');}
+async function envoyer(){const tel=document.getElementById('tel').value.replace(/\D/g,'');if(tel.length<9)return alert('Numéro invalide');const {error}=await supa.from('demandes').insert([{tel:tel,plan:curPlan,mois:curMois,total:curTotal,statut:'en_attente'}]);if(error)return alert(error.message);alert('✅ Reçu Loic va vérifier ton paiement au 653244734');closePay();}
+function initAdmin(){const list=document.getElementById('list'),audio=document.getElementById('ding');async function load(){const{data}=await supa.from('demandes').select('*').eq('statut','en_attente').order('created_at',{ascending:false});list.innerHTML=data?.length?'':'✅ Aucune demande';data?.forEach(d=>add(d,false));}function add(d,isNew){const el=document.createElement('div');el.className='acard';el.innerHTML=`<b>📞 ${d.tel}</b> - ${d.plan}<br><b style="font-size:18px">${d.total} FCFA</b> - ${d.mois} mois<br><small>${new Date(d.created_at).toLocaleString()}</small><br><button class="abtn abtn-wa" onclick="window.open('https://wa.me/237${d.tel.slice(-9)}')">📱 WhatsApp Client</button><button class="abtn abtn-ok" onclick="valider(${d.id})">✅ Marquer PAYÉ & Activer</button>`;list.prepend(el);if(isNew){audio.play().catch(()=>{});if(navigator.vibrate)navigator.vibrate([600,200,600]);}}window.valider=async id=>{await supa.from('demandes').update({statut:'paye'}).eq('id',id);load();};supa.channel('dem').on('postgres_changes',{event:'INSERT',schema:'public',table:'demandes'},p=>add(p.new,true)).subscribe();load();}
+</script>
+</body>
+</html>
