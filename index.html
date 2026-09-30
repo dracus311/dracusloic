@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>FacturoAfrique</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:Arial;margin:0;padding:15px}
+.client{background:#f8fafc} .admin{background:#0f172a;color:white;min-height:100vh}
+.plan{border:2px solid #e2e8f0;background:white;padding:15px;border-radius:12px;margin:10px 0;cursor:pointer;color:#000}
+.plan.active{border-color:#0ea5e9;background:#f0f9ff}
+.btn{padding:15px;border:none;border-radius:10px;width:100%;font-weight:bold;cursor:pointer;margin-top:10px}
+.btn-pay{background:#ff7900;color:white} .btn-ok{background:#22c55e;color:white}
+.card{background:#1e293b;padding:15px;border-radius:12px;margin:15px 0;border-left:5px solid #ef4444}
+.btn-wa{background:#25D366;color:white} .new{animation:blink 0.5s 4} @keyframes blink{50%{background:#ef4444}}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<!-- PARTIE CLIENT -->
+<div id="client">
+<h1>FacturoAfrique</h1>
+<h3>Choisis ton plan :</h3>
+<div class="plan active" onclick="setPlan('STANDARD',5000,this)"><b>STANDARD</b> - 5000 FCFA / mois</div>
+<div class="plan" onclick="setPlan('PRO',10000,this)"><b>PRO</b> - 10000 FCFA / mois</div>
+<div class="plan" onclick="setPlan('BUSINESS',20000,this)"><b>BUSINESS</b> - 20000 FCFA / mois</div>
+<h3>Durée :</h3>
+<select id="mois" onchange="calc()" style="padding:10px;width:100%"><option value="1">1 mois</option><option value="3">3 mois (-5%)</option><option value="6">6 mois (-10%)</option><option value="12">12 mois (-20%)</option></select>
+<div style="background:white;padding:15px;border-radius:12px;margin-top:15px;color:#000"><b>Total à payer : <span id="total">5000</span> FCFA</b><br><small>Orange Money : 6XX XX XX XX - Loic</small></div>
+<button class="btn btn-pay" onclick="alert('Paye par OM puis clique vert en dessous')">1️⃣ J'ai copié le numéro OM</button>
+<button class="btn btn-ok" onclick="dejaPaye()">2️⃣ ✅ J'ai déjà payé</button>
+</div>
+
+<!-- PARTIE ADMIN -->
+<div id="admin" class="hidden">
+<h1 style="color:#38bdf8">🔔 Demandes en attente (ADMIN)</h1>
+<div id="list">Chargement...</div>
+<audio id="ding" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" preload="auto"></audio>
+</div>
+
+<script>
+const SUPABASE_URL="https://mzjogfulbtcybsjwnvhr.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16am9nZnVsYnRjeWJzandudmhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MTg5OTksImV4cCI6MjEwNjI5NDk5OX0.wg_dNnggr7WLKnj1P1kd9jxPvWdX9vpsKsv1gh5dcJ8";
+const supa=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+// DETECTE SI ON EST SUR ADMIN
+const isAdmin = window.location.pathname.includes('admin');
+if(isAdmin){ document.body.className='admin'; document.getElementById('client').classList.add('hidden'); document.getElementById('admin').classList.remove('hidden'); initAdmin(); }
+else { document.body.className='client'; }
+
+// CLIENT LOGIC
+let prix=5000, plan='STANDARD';
+function setPlan(p,pr,el){plan=p;prix=pr;document.querySelectorAll('.plan').forEach(e=>e.classList.remove('active'));el.classList.add('active');calc();}
+function calc(){let m=document.getElementById('mois').value;let t=prix*m;if(m==3)t*=0.95;if(m==6)t*=0.90;if(m==12)t*=0.80;document.getElementById('total').innerText=Math.round(t);}
+async function dejaPaye(){let tel=prompt('Ton WhatsApp ?');if(!tel)return;let mois=document.getElementById('mois').value;let total=document.getElementById('total').innerText;const {error}=await supa.from('demandes').insert([{tel,plan,mois,total,statut:'en_attente'}]);if(error){alert(error.message);return;}alert('✅ Envoyé ! Loïc va te confirmer.');}
+calc();
+
+// ADMIN LOGIC
+function initAdmin(){
+  const listDiv=document.getElementById('list');const audio=document.getElementById('ding');
+  async function loadDemandes(){const {data,error}=await supa.from('demandes').select('*').eq('statut','en_attente').order('created_at',{ascending:false});if(error){listDiv.innerHTML=error.message;return;}listDiv.innerHTML='';if(!data||!data.length){listDiv.innerHTML='✅ Aucune demande';return;}data.forEach(d=>addCard(d,false));}
+  function addCard(d,isNew){const div=document.createElement('div');div.className='card'+(isNew?' new':'');div.innerHTML=`<b>📞 ${d.tel}</b><br>${d.plan} - ${d.mois} mois - <b>${d.total} FCFA</b><br><small>${new Date(d.created_at).toLocaleString()}</small><br><br><button class="btn btn-wa" onclick="window.open('https://wa.me/237${d.tel.replace(/\D/g,'').slice(-9)}')">WhatsApp</button><button class="btn btn-ok" onclick="valider(${d.id})">✅ Marquer Payé</button>`;listDiv.prepend(div);if(isNew){audio.play().catch(()=>{});if(navigator.vibrate)navigator.vibrate([500,200,500]);}}
+  window.valider=async(id)=>{await supa.from('demandes').update({statut:'paye'}).eq('id',id);loadDemandes();}
+  supa.channel('demandes').on('postgres_changes',{event:'INSERT',schema:'public',table:'demandes'},p=>addCard(p.new,true)).subscribe();
+  loadDemandes();
+}
+</script>
+</body>
+</html>
