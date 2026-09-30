@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>FacturoAfrique</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:Arial;margin:0;padding:15px}.client{background:#f8fafc} .admin{background:#0f172a;color:white;min-height:100vh}
+.plan{border:2px solid #e2e8f0;background:white;padding:15px;border-radius:12px;margin:10px 0;cursor:pointer;color:#000}
+.plan.active{border-color:#0ea5e9;background:#f0f9ff;border-width:3px}
+.btn{padding:15px;border:none;border-radius:10px;width:100%;font-weight:bold;cursor:pointer;margin-top:10px}
+.btn-pay{background:#ff7900;color:white} .btn-ok{background:#22c55e;color:white}
+.card{background:#1e293b;padding:15px;border-radius:12px;margin:15px 0;border-left:5px solid #ef4444}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div id="client">
+<h1>FacturoAfrique</h1>
+<h3>Choisis ton plan :</h3>
+<div class="plan active" onclick="setPlan('FREELANCE',2500,this)"><b>🚀 FREELANCE</b> - 2500 FCFA / mois<br><small>Factures illimitées - 1 utilisateur</small></div>
+<div class="plan" onclick="setPlan('ENTREPRISE',5000,this)"><b>🏢 ENTREPRISE</b> - 5000 FCFA / mois<br><small>Multi-utilisateurs + Support prioritaire</small></div>
+<h3>Durée :</h3>
+<select id="mois" onchange="calc()" style="padding:12px;width:100%;border-radius:8px"><option value="1">1 mois</option><option value="3">3 mois (-5%)</option><option value="6">6 mois (-10%)</option><option value="12">12 mois (-20%)</option></select>
+<div style="background:white;padding:15px;border-radius:12px;margin-top:15px;color:#000;border:2px dashed #ff7900"><b>Total : <span id="total">2500</span> FCFA</b><br><small>OM: 6XX XX XX XX - Loic</small></div>
+<button class="btn btn-pay" onclick="alert('Paye par OM puis clique vert')">1️⃣ J'ai copié le numéro OM</button>
+<button class="btn btn-ok" onclick="dejaPaye()">2️⃣ ✅ J'ai déjà payé - Activer</button>
+</div>
+<div id="admin" class="hidden"><h1 style="color:#38bdf8">🔔 ADMIN - Demandes</h1><div id="list">Chargement...</div><audio id="ding" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" preload="auto"></audio></div>
+<script>
+const supa=supabase.createClient("https://mzjogfulbtcybsjwnvhr.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16am9nZnVsYnRjeWJzandudmhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MTg5OTksImV4cCI6MjEwNjI5NDk5OX0.wg_dNnggr7WLKnj1P1kd9jxPvWdX9vpsKsv1gh5dcJ8");
+const isAdmin=window.location.pathname.includes('admin');
+if(isAdmin){document.body.className='admin';document.getElementById('client').classList.add('hidden');document.getElementById('admin').classList.remove('hidden');initAdmin();}else{document.body.className='client';}
+let prix=2500,plan='FREELANCE';
+function setPlan(p,pr,el){plan=p;prix=pr;document.querySelectorAll('.plan').forEach(e=>e.classList.remove('active'));el.classList.add('active');calc();}
+function calc(){let m=document.getElementById('mois').value;let t=prix*m;if(m==3)t*=0.95;if(m==6)t*=0.90;if(m==12)t*=0.80;document.getElementById('total').innerText=Math.round(t);}
+async function dejaPaye(){let tel=prompt('Ton WhatsApp ?');if(!tel)return;let mois=document.getElementById('mois').value;let total=document.getElementById('total').innerText;const {error}=await supa.from('demandes').insert([{tel,plan,mois,total,statut:'en_attente'}]);if(error){alert(error.message);return;}alert('✅ Envoyé ! Loïc va t\'activer.');}
+function initAdmin(){const listDiv=document.getElementById('list');const audio=document.getElementById('ding');async function load(){const {data}=await supa.from('demandes').select('*').eq('statut','en_attente').order('created_at',{ascending:false});listDiv.innerHTML='';if(!data||!data.length){listDiv.innerHTML='✅ Aucune demande';return;}data.forEach(d=>add(d,false));}function add(d,n){const div=document.createElement('div');div.className='card';div.innerHTML=`<b>📞 ${d.tel}</b><br>${d.plan} ${d.mois} mois <b>${d.total} FCFA</b><br><button class="btn" style="background:#25D366;color:white" onclick="window.open('https://wa.me/237${d.tel.replace(/\D/g,'').slice(-9)}')">WhatsApp</button><button class="btn btn-ok" onclick="valider(${d.id})">✅ Payé</button>`;listDiv.prepend(div);if(n){audio.play().catch(()=>{});if(navigator.vibrate)navigator.vibrate([500,200,500]);}}window.valider=async(id)=>{await supa.from('demandes').update({statut:'paye'}).eq('id',id);load();};supa.channel('demandes').on('postgres_changes',{event:'INSERT',schema:'public',table:'demandes'},p=>add(p.new,true)).subscribe();load();}
+calc();
+</script>
+</body>
+</html>
