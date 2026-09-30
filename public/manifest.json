@@ -1,0 +1,9 @@
+{
+  "name": "Dracus Loic IPTV",
+  "short_name": "Dracus IPTV",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050508",
+  "theme_color": "#3b82f6",
+  "icons": [{"src": "https://i.postimg.cc/XYZ/icon-512.png","sizes":"512x512","type":"image/png"}]
+}
