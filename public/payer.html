@@ -1,0 +1,14 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Payer</title><style>body{background:#080A12;color:#fff;font-family:system-ui;padding:20px}.card{background:#11152A;border:1px solid #1E2642;border-radius:18px;padding:24px;max-width:430px;margin:auto}input,select{width:100%;padding:13px;background:#0E1224;border:1px solid #1E2642;border-radius:10px;color:#fff;margin:8px 0}.btn{width:100%;padding:15px;border:none;border-radius:12px;font-weight:800;color:#fff}.orange{background:#FF6B00}</style></head><body><div class="card">
+<h2>Débloquer FacturoAfrik</h2>
+<div style="background:#0E1224;padding:12px;border-radius:10px;border-left:3px solid #FF6B00;margin:10px 0">Envoie <b id="mtxt">2500 FCFA</b> au<br><b style="color:#FF6B00;font-size:22px">690186311</b><br>Orange Money - Loïc</div>
+<select id="plan" onchange="calc()"><option value="freelance">Freelance 2500/mois</option><option value="entreprise">Entreprise 5000/mois</option></select>
+<select id="mois" onchange="calc()"><option value="1">1 mois = 2500</option><option value="2">2 mois = 5000</option><option value="3">3 mois = 7500</option></select>
+<p>Total: <b id="total" style="color:#00D88C">2500 FCFA</b></p>
+<input id="tel" placeholder="Ton WhatsApp 6XXXXXXXX (ton numéro = ta clé)">
+<button class="btn orange" onclick="payer()">J'AI PAYÉ AU 690186311</button>
+<p style="font-size:12px;color:#8B93B0;margin-top:10px">Ton numéro = ton abonnement. Pas besoin d'ID.</p>
+</div>
+<script>
+function calc(){let b=plan.value=='freelance'?2500:5000;let t=b*parseInt(mois.value);total.innerText=t.toLocaleString()+' FCFA';mtxt.innerText=total.innerText}calc();
+function payer(){if(!tel.value){alert('Entre ton numéro');return}let txt=`Paiement FacturoAfrik%0APlan:${plan.value}%0AMois:${mois.value}%0ATotal:${total.innerText}%0ATel client:${tel.value}%0A%0AClient a payé au 690186311`;window.open(`https://wa.me/237690186311?text=${txt}`,'_blank');localStorage.setItem('fa_tel',tel.value);setTimeout(()=>location.href='admin.html',1200)}
+</script></body></html>
